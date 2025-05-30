@@ -46,7 +46,7 @@ class ArcDataset(object):
             challenge = f.read()
         return cls(
             challenge=json.loads(challenge),
-            is_fake=hashlib.md5(challenge.encode('utf-8')).hexdigest().lower() == 'a6b7dac3cab03abf2eb333e16610d6dc',
+            is_fake=False,#hashlib.md5(challenge.encode('utf-8')).hexdigest().lower() == 'a6b7dac3cab03abf2eb333e16610d6dc',
             is_orig=True,
         )
 
