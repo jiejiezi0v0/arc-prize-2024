@@ -25,7 +25,7 @@ from model_tools import load_peft_state, merge_peft_into_base
 from arc_downloader import download_arc_data
 
 # input paths
-base_model = 'nvidia/Mistral-NeMo-Minitron-8B-Base'  # auto-downloaded from huggingface.co
+base_model = 'Qwen/Qwen3-14B'  # auto-downloaded from huggingface.co
 arc_data_path = os.path.join('input', 'arc-prize-2024')  # as on kaggle arc prize 2024
 download_arc_data(arc_data_path)
 re_arc_path = os.path.join('input', 're_arc')  # https://github.com/michaelhodel/re-arc
@@ -44,14 +44,14 @@ for action in ['train', 'merge']:
     # load base model & reduce embedding size
     model = tokenizer = None  # free memory
     model, tokenizer = load_unsloth_4bit(base_model)
-    keep_tok = list('ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!?.:,;*+/-=')+tokenizer.tokenize('\n')
+    keep_tok = list('0123456789QA:')+tokenizer.tokenize('\n')
     keep_single_char_tokens(model, tokenizer, keep=keep_tok, remove_unk=True)
 
     # set formatting options
     fmt_opts = dict(
-        preprompt='ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjklmnpqrstuvwxyz',
-        query_beg='I',
-        reply_beg='\n+/-=O',
+        preprompt='',
+        query_beg='Q:',
+        reply_beg='\nA:',
         reply_end='\n' + tokenizer.eos_token,
         lines_sep='\n',
         max_tokens=8192,
@@ -64,7 +64,7 @@ for action in ['train', 'merge']:
         target_modules=lora_layers,
         r=256,
         lora_alpha=24,
-        lora_dropout=0,
+        lora_dropout=0.05,
         bias="none",
         use_gradient_checkpointing=True,
         random_state=42,
@@ -110,7 +110,7 @@ for action in ['train', 'merge']:
                 per_device_train_batch_size=4,
                 gradient_accumulation_steps=2,
                 warmup_ratio=0.25,
-                num_train_epochs=1,
+                num_train_epochs=10,
                 learning_rate=1e-4,
                 embedding_learning_rate=1e-5,
                 fp16=not is_bfloat16_supported(),
