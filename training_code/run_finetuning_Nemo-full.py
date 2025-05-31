@@ -58,13 +58,14 @@ for action in ['train', 'merge']:
     )
 
     # create lora model
-    lora_layers = ['q_proj', 'k_proj', 'v_proj', 'o_proj', 'gate_proj', 'up_proj', 'down_proj', 'embed_tokens', 'lm_head']
+    lora_layers = ["q_proj", "k_proj", "v_proj", "o_proj",
+                      "gate_proj", "up_proj", "down_proj", "lm_head", "embed_tokens"]
     model = FastLanguageModel.get_peft_model(
         model=model,
         target_modules=lora_layers,
         r=256,
         lora_alpha=24,
-        lora_dropout=0.05,
+        lora_dropout=0.01,
         bias="none",
         use_gradient_checkpointing=True,
         random_state=42,
@@ -111,7 +112,7 @@ for action in ['train', 'merge']:
                 gradient_accumulation_steps=2,
                 warmup_ratio=0.25,
                 num_train_epochs=10,
-                learning_rate=1e-4,
+                learning_rate=2e-4,
                 embedding_learning_rate=1e-5,
                 fp16=not is_bfloat16_supported(),
                 bf16=is_bfloat16_supported(),
