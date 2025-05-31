@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import os
+import gc
 from unsloth import FastLanguageModel
 from unsloth import UnslothTrainer as Trainer, unsloth_train, is_bfloat16_supported
 from unsloth import UnslothTrainingArguments as TrainingArguments
@@ -34,12 +35,8 @@ neoneye_path = os.path.join('input', 'arc-dataset-collection')  # https://github
 # output paths
 save_model_path = os.path.join('pretrained_models', "Mistral-NeMo-Minitron-Full")
 
-for action in ['train', 'merge']:
-    # continue if task already accomplished
-    if action == 'train' and os.path.exists(f'{save_model_path}-lora'):
-        continue
-    if action == 'merge' and os.path.exists(f'{save_model_path}-merged'):
-        continue
+for action in ['train', 'merge', 'train', 'merge']:
+    gc.collect()
 
     # load base model & reduce embedding size
     model = tokenizer = None  # free memory
@@ -64,7 +61,7 @@ for action in ['train', 'merge']:
         model=model,
         target_modules=lora_layers,
         r=256,
-        lora_alpha=24,
+        lora_alpha=48,
         lora_dropout=0.01,
         bias="none",
         use_gradient_checkpointing=True,
